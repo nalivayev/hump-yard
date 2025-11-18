@@ -1,0 +1,9 @@
+*.log
+*.pyc
+*.sqlite3
+*.egg-info/
+__pycache__/
+build/
+dist/
+.vscode/
+.venv/
