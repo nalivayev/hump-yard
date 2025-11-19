@@ -1,0 +1,25 @@
+{
+  "_comment": "This is an example configuration file for hump-yard",
+  "_comment2": "Copy this file as config.json and adjust to your needs",
+  "_comment3": "Note: Built-in plugins (rename, exif) are templates and not fully implemented yet",
+  
+  "folders": [
+    {
+      "path": "C:/Users/YourName/Pictures",
+      "recursive": true,
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif"],
+      "plugin": "your_custom_plugin"
+    },
+    {
+      "path": "C:/Users/YourName/Downloads",
+      "recursive": false,
+      "extensions": [".pdf", ".doc", ".docx"],
+      "plugin": "your_custom_plugin"
+    },
+    {
+      "path": "C:/Temp/uploads",
+      "recursive": true,
+      "plugin": "your_custom_plugin"
+    }
+  ]
+}
