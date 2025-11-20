@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0] - 2025-11-20
+
+### Added
+- ✅ **Daemon management commands:** start, stop, restart, status
+- ✅ **PID file management** for tracking daemon process
+- ✅ **Signal handlers** for graceful shutdown (SIGTERM, SIGINT)
+- ✅ **Background execution** (daemonize on Unix, detached process on Windows)
+- ✅ **Foreground mode** with --foreground flag for debugging
+- ✅ **Process status checking** across Windows and Unix platforms
+
+### Improved
+- Complete CLI rewrite with proper daemon management
+- Cross-platform support for Windows and Unix
+- Better error handling and user feedback
+- Updated documentation with new command examples
+
 ## [0.1.0] - 2025-11-19
 
 ### Fixed

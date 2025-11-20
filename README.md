@@ -74,17 +74,29 @@ Create a `config.json` file with the following structure:
 
 ## Usage
 
-### Running from Command Line
+### Daemon Management
 
 ```bash
-# Run with config.json in current directory
-hump-yard
+# Start daemon in background
+hump-yard start
 
-# With custom configuration path
-hump-yard -c /path/to/config.json
+# Start with custom config
+hump-yard start -c /path/to/config.json
 
-# With logging level
-hump-yard --log-level DEBUG
+# Start with logging level
+hump-yard start --log-level DEBUG
+
+# Start in foreground (Ctrl+C to stop)
+hump-yard start --foreground
+
+# Stop daemon
+hump-yard stop
+
+# Restart daemon
+hump-yard restart
+
+# Check daemon status
+hump-yard status
 
 # Show version
 hump-yard --version
@@ -143,17 +155,27 @@ class MyPlugin(FileProcessorPlugin):
 ## Command Line Options
 
 ```
-usage: hump-yard [-h] [-c CONFIG] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+usage: hump-yard [-h] [-c CONFIG] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--foreground]
+                 {start,stop,restart,status}
 
 Hump Yard - File monitoring daemon with plugin support
 
-options:
-  -h, --help            show this help message and exit
+Commands:
+  {start,stop,restart,status}
+                        Command to execute (default: start)
+    start               Start the daemon in background
+    stop                Stop the daemon
+    restart             Restart the daemon
+    status              Check daemon status
+
+Options:
+  -h, --help            Show this help message and exit
   -c CONFIG, --config CONFIG
                         Path to configuration file (default: config.json)
-  -v, --version         show program's version number and exit
+  -v, --version         Show program's version number and exit
   --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set logging level (default: INFO)
+  --foreground          Run in foreground (for start command)
 ```
 
 ## Project Structure
