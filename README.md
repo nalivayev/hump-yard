@@ -41,7 +41,7 @@ Or install with additional dependencies:
 # For EXIF plugin support
 pip install -e ".[exif]"
 
-# For development (with tests and linters)
+# For development (with code formatters and type checking)
 pip install -e ".[dev]"
 
 # Everything together
@@ -203,7 +203,7 @@ hump-yard/
 
 ## Requirements
 
-- Python 3.7+
+- Python 3.10+
 - watchdog >= 2.1.0
 
 ## Installation from PyPI

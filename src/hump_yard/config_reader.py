@@ -131,18 +131,11 @@ class ConfigReader:
         for folder_config in self.folders:
             try:
                 # Check if file is in monitored folder
-                # is_relative_to() is only available in Python 3.9+
-                # Using alternative method for compatibility
                 folder_path = folder_config.path.resolve()
-                try:
-                    file_path_obj.relative_to(folder_path)
-                    # If no exception was raised, file is in folder
+                if file_path_obj.is_relative_to(folder_path):
                     # Check extension filter
                     if folder_config.should_process_file(file_path_obj):
                         return folder_config
-                except ValueError:
-                    # file_path is not a subpath of folder_config.path
-                    continue
             except Exception as e:
                 self.logger.error(f"Error checking folder config: {e}")
                 continue

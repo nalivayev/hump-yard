@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0] - 2025-11-25
+
+### Changed
+- ✅ **Minimum Python version raised to 3.10+**
+- ✅ Simplified code by using `Path.is_relative_to()` (available since Python 3.9)
+- ✅ Simplified entry points discovery using stable Python 3.10+ API
+- ✅ Replaced deprecated `_getexif()` with `getexif()` in EXIF plugin
+- ✅ Improved type hints and removed compatibility workarounds
+- ✅ Updated all package docstrings to follow PEP 257
+
+### Removed
+- ✅ Removed test dependencies (pytest, pytest-cov) - no tests in project yet
+- ✅ Removed flake8 dependency - using black for formatting
+- ✅ Removed pytest configuration from pyproject.toml
+
+### Fixed
+- ✅ Fixed type checking issues in `base_plugin.py` and `daemon.py`
+- ✅ Fixed import issues by using `importlib.metadata` instead of deprecated `pkg_resources`
+- ✅ Added proper None checks for `package.__file__`
+
 ## [0.2.0] - 2025-11-20
 
 ### Added
@@ -51,6 +71,6 @@
 - Translated all code, comments, and documentation to English
 
 ### Requirements
-- Python >= 3.7
+- Python >= 3.10
 - watchdog >= 2.1.0
 - Pillow (optional, for exif_plugin)

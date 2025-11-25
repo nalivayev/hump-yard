@@ -64,7 +64,8 @@ class ExifPlugin(FileProcessorPlugin):
             
             # Open image
             with Image.open(file_path) as img:
-                exif_data = img._getexif()
+                # Use getexif() instead of deprecated _getexif()
+                exif_data = img.getexif()
                 
                 if not exif_data:
                     self.logger.warning(f"No EXIF data found in {file_path_obj.name}")

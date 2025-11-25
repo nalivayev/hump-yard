@@ -126,6 +126,10 @@ class PluginManager:
         """
         try:
             package = importlib.import_module(package_name)
+            if package.__file__ is None:
+                self.logger.warning(f"Package {package_name} has no __file__ attribute")
+                return
+            
             package_path = Path(package.__file__).parent
             
             for _, module_name, is_pkg in pkgutil.iter_modules([str(package_path)]):
@@ -164,7 +168,10 @@ class PluginManager:
         """Discover plugins from external packages via entry points."""
         try:
             import importlib.metadata
-            discovered_plugins = importlib.metadata.entry_points(group='file_monitor.plugins')
+            
+            # Python 3.10+ has stable entry_points API with select method
+            eps = importlib.metadata.entry_points()
+            discovered_plugins = eps.select(group='file_monitor.plugins')
             
             for entry_point in discovered_plugins:
                 try:
@@ -173,20 +180,8 @@ class PluginManager:
                 except Exception as e:
                     self.logger.error(f"Error loading plugin from entry point {entry_point.name}: {e}")
                     
-        except ImportError:
-            # For Python < 3.8 use pkg_resources
-            try:
-                import pkg_resources
-                discovered_plugins = pkg_resources.iter_entry_points('file_monitor.plugins')
-                
-                for entry_point in discovered_plugins:
-                    try:
-                        plugin_class = entry_point.load()
-                        self.register_plugin(plugin_class)
-                    except Exception as e:
-                        self.logger.error(f"Error loading plugin from entry point {entry_point.name}: {e}")
-            except ImportError:
-                self.logger.warning("Entry points not supported")
+        except (ImportError, AttributeError) as e:
+            self.logger.warning(f"Entry points not supported or error occurred: {e}")
     
     def get_plugin(self, name: str) -> Optional[FileProcessorPlugin]:
         """

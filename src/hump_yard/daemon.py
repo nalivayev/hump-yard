@@ -5,6 +5,7 @@ import time
 import logging
 from pathlib import Path
 from typing import List
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
@@ -32,7 +33,7 @@ class FileEventHandler(FileSystemEventHandler):
             event: The file system event.
         """
         if not event.is_directory:
-            self.daemon.process_file(event.src_path)
+            self.daemon.process_file(str(event.src_path))
 
 
 class FileMonitorDaemon:
