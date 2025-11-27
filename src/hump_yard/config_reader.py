@@ -4,7 +4,7 @@ Configuration reader for folder monitoring settings.
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 
 
 class FolderConfig:
@@ -19,7 +19,7 @@ class FolderConfig:
         plugin_config: Additional configuration for the plugin.
     """
     
-    def __init__(self, config_dict: Dict[str, Any]) -> None:
+    def __init__(self, config_dict: dict[str, Any]) -> None:
         """
         Initialize folder configuration from a dictionary.
         
@@ -28,9 +28,9 @@ class FolderConfig:
         """
         self.path: Path = Path(config_dict['path'])
         self.recursive: bool = config_dict.get('recursive', False)
-        self.extensions: List[str] = config_dict.get('extensions', ['.tiff', '.tif', '.jpg'])
+        self.extensions: list[str] = config_dict.get('extensions', ['.tiff', '.tif', '.jpg'])
         self.plugin: str = config_dict['plugin']
-        self.plugin_config: Dict[str, Any] = {k: v for k, v in config_dict.items() 
+        self.plugin_config: dict[str, Any] = {k: v for k, v in config_dict.items() 
                             if k not in ['path', 'recursive', 'extensions', 'plugin']}
     
     def should_process_file(self, file_path: Path) -> bool:
@@ -46,7 +46,8 @@ class FolderConfig:
         if not self.extensions:
             return True
         
-        return file_path.suffix.lower() in [ext.lower() for ext in self.extensions]
+        file_ext = file_path.suffix.lower()
+        return any(file_ext == ext.lower() for ext in self.extensions)
     
     def __repr__(self) -> str:
         return f"FolderConfig(path={self.path}, recursive={self.recursive}, plugin={self.plugin})"
@@ -70,7 +71,7 @@ class ConfigReader:
             config_path: Path to the configuration JSON file.
         """
         self.config_path: Path = Path(config_path)
-        self.folders: List[FolderConfig] = []
+        self.folders: list[FolderConfig] = []
         self.logger: logging.Logger = logging.getLogger("ConfigReader")
         self._load_config()
     
@@ -92,7 +93,7 @@ class ConfigReader:
         except Exception as e:
             self.logger.error(f"Error loading config: {e}")
     
-    def _parse_config(self, config_data: Dict[str, Any]) -> None:
+    def _parse_config(self, config_data: dict[str, Any]) -> None:
         """
         Parse configuration data.
         
@@ -142,7 +143,7 @@ class ConfigReader:
         
         return None
     
-    def get_all_folders(self) -> List[FolderConfig]:
+    def get_all_folders(self) -> list[FolderConfig]:
         """
         Get all folder configurations.
         
@@ -150,11 +151,3 @@ class ConfigReader:
             Copy of the list of folder configurations.
         """
         return self.folders.copy()
-    
-    def reload(self) -> None:
-        """Reload configuration from file."""
-        self.logger.info("Reloading configuration")
-        old_count = len(self.folders)
-        self._load_config()
-        new_count = len(self.folders)
-        self.logger.info(f"Configuration reloaded: {old_count} -> {new_count} folders")

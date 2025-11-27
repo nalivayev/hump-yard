@@ -4,7 +4,6 @@ File monitoring daemon with plugin support.
 import time
 import logging
 from pathlib import Path
-from typing import List
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
@@ -55,10 +54,10 @@ class FileMonitorDaemon:
         Args:
             config_path: Path to the configuration file.
         """
-        self.config_reader: ConfigReader = ConfigReader(config_path)
-        self.plugin_manager: PluginManager = PluginManager()
-        self.observers: List[Observer] = []
-        self.event_handler: FileEventHandler = FileEventHandler(self)
+        self.config_reader = ConfigReader(config_path)
+        self.plugin_manager = PluginManager()
+        self.observers = []
+        self.event_handler = FileEventHandler(self)
         self.logger: logging.Logger
         
         self.setup_logging()
@@ -145,21 +144,3 @@ class FileMonitorDaemon:
         for observer in self.observers:
             observer.stop()
             observer.join()
-    
-    def reload_config(self) -> None:
-        """Reload configuration and restart observers."""
-        self.logger.info("Reloading configuration")
-        
-        # Stop current observers
-        for observer in self.observers:
-            observer.stop()
-            observer.join()
-        self.observers.clear()
-        
-        # Reload configuration
-        self.config_reader.reload()
-        self.setup_observers()
-        
-        # Start new observers
-        for observer in self.observers:
-            observer.start()

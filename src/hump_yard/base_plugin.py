@@ -3,12 +3,11 @@ Base classes for file processing plugins.
 """
 import abc
 import logging
-from typing import Dict, Any
+from typing import Any
 import importlib
 import pkgutil
 import sys
 from pathlib import Path
-from typing import Type, List, Optional
 
 
 class FileProcessorPlugin(abc.ABC):
@@ -59,7 +58,7 @@ class FileProcessorPlugin(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def process(self, file_path: str, config: Dict[str, Any]) -> bool:
+    def process(self, file_path: str, config: dict[str, Any]) -> bool:
         """
         Process the file.
         
@@ -96,11 +95,10 @@ class PluginManager:
     
     def __init__(self) -> None:
         """Initialize the plugin manager."""
-        self.plugins: Dict[str, FileProcessorPlugin] = {}
-        self._discovered_plugins: Dict[str, Any] = {}
+        self.plugins: dict[str, FileProcessorPlugin] = {}
         self.logger: logging.Logger = logging.getLogger("PluginManager")
     
-    def register_plugin(self, plugin_class: Type[FileProcessorPlugin]) -> None:
+    def register_plugin(self, plugin_class: type[FileProcessorPlugin]) -> None:
         """
         Register a plugin class.
         
@@ -171,7 +169,7 @@ class PluginManager:
             
             # Python 3.10+ has stable entry_points API with select method
             eps = importlib.metadata.entry_points()
-            discovered_plugins = eps.select(group='file_monitor.plugins')
+            discovered_plugins = eps.select(group='hump_yard.plugins')
             
             for entry_point in discovered_plugins:
                 try:
@@ -183,7 +181,7 @@ class PluginManager:
         except (ImportError, AttributeError) as e:
             self.logger.warning(f"Entry points not supported or error occurred: {e}")
     
-    def get_plugin(self, name: str) -> Optional[FileProcessorPlugin]:
+    def get_plugin(self, name: str) -> FileProcessorPlugin | None:
         """
         Get a plugin by name.
         
@@ -195,7 +193,7 @@ class PluginManager:
         """
         return self.plugins.get(name)
     
-    def list_plugins(self) -> List[str]:
+    def list_plugins(self) -> list[str]:
         """
         Get a list of all registered plugin names.
         
