@@ -4,6 +4,7 @@ File monitoring daemon with plugin support.
 import time
 import logging
 from pathlib import Path
+from typing import Optional
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
@@ -47,12 +48,13 @@ class FileMonitorDaemon:
         logger: Logger instance.
     """
     
-    def __init__(self, config_path: str = "config.json") -> None:
+    def __init__(self, config_path: Optional[str] = None) -> None:
         """
         Initialize the file monitor daemon.
         
         Args:
-            config_path: Path to the configuration file.
+            config_path: Path to the configuration file. 
+                        If None, uses default path (current dir or standard config dir).
         """
         self.config_reader = ConfigReader(config_path)
         self.plugin_manager = PluginManager()
@@ -74,7 +76,7 @@ class FileMonitorDaemon:
     
     def load_plugins(self) -> None:
         """Load all available plugins."""
-        self.plugin_manager.discover_plugins('hump_yard.plugins')
+        self.plugin_manager.discover_plugins('file_monitor.plugins')
         self.plugin_manager.discover_external_plugins()
         self.logger.info(f"Loaded plugins: {self.plugin_manager.list_plugins()}")
     

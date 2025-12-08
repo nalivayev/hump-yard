@@ -1,0 +1,22 @@
+{
+  "_comment": "Configuration file for hump-yard file monitoring daemon",
+  "_comment2": "Add folders to monitor in the 'folders' array below",
+  "_comment3": "Each folder entry can have the following parameters:",
+  "_comment4": "  - path: Absolute path to the folder to monitor (required)",
+  "_comment5": "  - plugin: Name of the plugin to process files (required)",
+  "_comment6": "  - recursive: Monitor subfolders recursively (optional, default: false)",
+  "_comment7": "  - extensions: List of file extensions to process (optional, default: all files)",
+  "_comment8": "  - ...other plugin-specific parameters",
+  
+  "folders": [
+    {
+      "_comment": "Example configuration (remove this entry and add your own)",
+      "path": "/absolute/path/to/folder",
+      "plugin": "your_plugin_name",
+      "recursive": true,
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif", ".pdf"],
+      "_comment2": "Add any additional plugin-specific parameters here",
+      "_example_param": "example_value"
+    }
+  ]
+}

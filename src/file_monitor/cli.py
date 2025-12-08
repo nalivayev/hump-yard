@@ -95,7 +95,7 @@ def is_process_running(pid: int) -> bool:
         return False
 
 
-def cmd_start(config_path: str, log_level: str, foreground: bool = False) -> None:
+def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = False) -> None:
     """
     Start the daemon.
     
@@ -114,11 +114,7 @@ def cmd_start(config_path: str, log_level: str, foreground: bool = False) -> Non
     if pid:
         remove_pid_file()
     
-    # Check configuration file exists
-    config_file = Path(config_path)
-    if not config_file.exists():
-        print(f"Error: Configuration file not found: {config_path}", file=sys.stderr)
-        sys.exit(1)
+    # Note: We don't check if config exists here, as ConfigReader will create it if needed
     
     if foreground:
         # Run in foreground
@@ -135,7 +131,7 @@ def cmd_start(config_path: str, log_level: str, foreground: bool = False) -> Non
                     python_exe = pythonw
             
             # Start detached process
-            args = [python_exe, '-m', 'hump_yard.cli', '_run', '-c', config_path, '--log-level', log_level]
+            args = [python_exe, '-m', 'file_monitor.cli', '_run', '-c', config_path, '--log-level', log_level]
             subprocess.Popen(args, creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
             time.sleep(1)  # Wait for process to start
             
@@ -165,7 +161,7 @@ def cmd_start(config_path: str, log_level: str, foreground: bool = False) -> Non
             _run_daemon(config_path, log_level)
 
 
-def _run_daemon(config_path: str, log_level: str) -> None:
+def _run_daemon(config_path: Optional[str], log_level: str) -> None:
     """
     Internal function to run the daemon.
     
@@ -245,7 +241,7 @@ def cmd_stop() -> None:
         sys.exit(1)
 
 
-def cmd_restart(config_path: str, log_level: str) -> None:
+def cmd_restart(config_path: Optional[str], log_level: str) -> None:
     """
     Restart the daemon.
     
@@ -278,9 +274,9 @@ def cmd_status() -> None:
 
 
 def main() -> None:
-    """Entry point for the hump-yard console command."""
+    """Entry point for the folder-monitor console command."""
     parser = argparse.ArgumentParser(
-        description='Hump Yard - File monitoring daemon with plugin support',
+        description='Folder Monitor - File monitoring daemon with plugin support',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Commands:
@@ -290,12 +286,12 @@ Commands:
   status      Check daemon status
 
 Examples:
-  hump-yard start                      # Start with config.json
-  hump-yard start -c /path/config.json # Start with custom config
-  hump-yard stop                        # Stop daemon
-  hump-yard restart                     # Restart daemon
-  hump-yard status                      # Check status
-  hump-yard start --foreground          # Run in foreground (Ctrl+C to stop)
+  folder-monitor start                      # Start with config.json
+  folder-monitor start -c /path/config.json # Start with custom config
+  folder-monitor stop                        # Stop daemon
+  folder-monitor restart                     # Restart daemon
+  folder-monitor status                      # Check status
+  folder-monitor start --foreground          # Run in foreground (Ctrl+C to stop)
         """
     )
     
@@ -310,8 +306,8 @@ Examples:
     parser.add_argument(
         '-c', '--config',
         type=str,
-        default='config.json',
-        help='Path to configuration file (default: config.json)'
+        default=None,
+        help='Path to configuration file (default: auto-detect or create in standard location)'
     )
     
     parser.add_argument(

@@ -50,65 +50,96 @@ pip install -e ".[exif,dev]"
 
 ## Configuration
 
-Create a `config.json` file with the following structure:
+On first run, folder-monitor automatically creates a default configuration file with detailed examples and parameter descriptions:
+- **Windows**: `%APPDATA%\hump-yard\config.json` (e.g., `C:\Users\YourName\AppData\Roaming\hump-yard\config.json`)
+- **Linux/Unix**: `~/.config/hump-yard/config.json`
+
+You can also place `config.json` in the current directory - it will be used with higher priority.
+
+The generated config file contains inline documentation and example entries. Edit it to add your folders to monitor:
 
 ```json
 {
   "folders": [
     {
-      "path": "/absolute/path/to/folder",
+      "path": "C:/Users/YourName/Pictures",
+      "plugin": "your_plugin_name",
       "recursive": true,
-      "extensions": [".jpg", ".png", ".pdf"],
-      "plugin": "plugin_name"
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff"]
+    },
+    {
+      "path": "C:/Users/YourName/Downloads",
+      "plugin": "your_plugin_name",
+      "recursive": false,
+      "extensions": [".pdf", ".doc"]
     }
   ]
 }
 ```
 
+**Note:** Remove or modify the example entries in the generated config file. Placeholder paths (starting with `/absolute/path/`) are automatically skipped.
+
 ### Configuration Parameters:
 
+#### Required Parameters:
 - **path** - Absolute path to the folder to monitor
-- **recursive** - Whether to track subfolders (true/false)
-- **extensions** - List of file extensions to process (optional)
 - **plugin** - Name of the plugin to process files
+
+#### Optional Parameters:
+- **recursive** - Monitor subfolders recursively (default: `false`)
+- **extensions** - List of file extensions to process (default: all files)
+  - Example: `[".jpg", ".jpeg", ".png", ".tiff", ".tif"]`
+  - If omitted, all file types will be processed
+
+#### Plugin-Specific Parameters:
+Each plugin may accept additional parameters. Add them directly to the folder configuration entry. Refer to your plugin's documentation for available options.
+
+### Configuration File Locations:
+
+The daemon searches for configuration in the following order:
+1. `./config.json` - Current directory (highest priority)
+2. Standard config directory (platform-specific, as shown above)
+3. Custom path specified with `-c` option
 
 ## Usage
 
 ### Daemon Management
 
 ```bash
-# Start daemon in background
-hump-yard start
+# Start daemon in background (auto-creates config if needed)
+folder-monitor start
 
-# Start with custom config
-hump-yard start -c /path/to/config.json
+# Start with custom config file
+folder-monitor start -c /path/to/config.json
 
 # Start with logging level
-hump-yard start --log-level DEBUG
+folder-monitor start --log-level DEBUG
 
 # Start in foreground (Ctrl+C to stop)
-hump-yard start --foreground
+folder-monitor start --foreground
 
 # Stop daemon
-hump-yard stop
+folder-monitor stop
 
 # Restart daemon
-hump-yard restart
+folder-monitor restart
 
 # Check daemon status
-hump-yard status
+folder-monitor status
 
 # Show version
-hump-yard --version
+folder-monitor --version
 
 # Help
-hump-yard --help
+folder-monitor --help
 ```
+
+**Note**: On first run without existing config, folder-monitor creates a default empty configuration file in the standard location. Edit it to add folders to monitor.
 
 ### Using as a Library
 
 ```python
-from hump_yard import FileMonitorDaemon
+from file_monitor import FileMonitorDaemon
 
 daemon = FileMonitorDaemon("config.json")
 daemon.start()
@@ -120,12 +151,12 @@ To create your own plugin:
 
 1. Create a class inheriting from `FileProcessorPlugin`
 2. Implement required methods
-3. Place the plugin in the `hump_yard/plugins/` folder
+3. Place the plugin in the `file_monitor/plugins/` folder
 
 Example plugin:
 
 ```python
-from hump_yard.base_plugin import FileProcessorPlugin
+from file_monitor.base_plugin import FileProcessorPlugin
 from typing import Dict, Any
 
 class MyPlugin(FileProcessorPlugin):
@@ -155,10 +186,10 @@ class MyPlugin(FileProcessorPlugin):
 ## Command Line Options
 
 ```
-usage: hump-yard [-h] [-c CONFIG] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--foreground]
-                 {start,stop,restart,status}
+usage: folder-monitor [-h] [-c CONFIG] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--foreground]
+                      {start,stop,restart,status}
 
-Hump Yard - File monitoring daemon with plugin support
+Folder Monitor - File monitoring daemon with plugin support
 
 Commands:
   {start,stop,restart,status}

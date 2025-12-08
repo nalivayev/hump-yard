@@ -1,5 +1,33 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- ✅ **Package renamed from `hump_yard` to `file_monitor`** - More descriptive package name
+  - Repository name remains `hump-yard`
+  - CLI command changed from `hump-yard` to `folder-monitor`
+  - Import path changed: `from file_monitor import ...`
+
+### Added
+- ✅ **Automatic configuration creation** - Default config is created on first run
+- ✅ **Standard config paths** - Uses platform-specific config directories:
+  - Windows: `%APPDATA%\hump-yard\config.json`
+  - Linux/Unix: `~/.config/hump-yard/config.json`
+- ✅ **Config priority system** - Searches for config in multiple locations:
+  1. `./config.json` (current directory)
+  2. Standard config directory
+  3. Custom path with `-c` option
+- ✅ **Template-based config** - Ships with `config.template.json` in package
+
+### Changed
+- ✅ `ConfigReader` now accepts `None` as config_path (auto-detection)
+- ✅ `FileMonitorDaemon` now accepts `None` as config_path
+- ✅ CLI no longer requires config file to exist before starting
+
+### Removed
+- ✅ Removed redundant `src/hump_yard/config.json` (kept only template)
+- ✅ Removed `[tool.setuptools.package-data]` for `*.json` files
+
 ## [0.3.0] - 2025-11-25
 
 ### Changed

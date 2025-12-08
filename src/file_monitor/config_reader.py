@@ -3,8 +3,104 @@ Configuration reader for folder monitoring settings.
 """
 import json
 import logging
+import sys
+import os
 from pathlib import Path
 from typing import Any, Optional
+
+try:
+    from importlib.resources import files
+except ImportError:
+    # Fallback for Python < 3.9
+    try:
+        from importlib_resources import files  # type: ignore
+    except ImportError:
+        files = None  # type: ignore
+
+
+def get_config_dir() -> Path:
+    """
+    Get the standard configuration directory for hump-yard.
+    
+    Returns:
+        Path to the configuration directory.
+    """
+    if sys.platform == 'win32':
+        # Windows: %APPDATA%\hump-yard
+        config_dir = Path(os.environ.get('APPDATA', Path.home() / 'AppData' / 'Roaming')) / 'hump-yard'
+    else:
+        # Linux/Unix: ~/.config/hump-yard
+        config_dir = Path.home() / '.config' / 'hump-yard'
+    
+    return config_dir
+
+
+def get_default_config_path() -> Path:
+    """
+    Get the default configuration file path.
+    
+    Searches for config in the following order:
+    1. ./config.json (current directory)
+    2. <config_dir>/config.json (standard config directory)
+    
+    Returns:
+        Path to the configuration file (may not exist yet).
+    """
+    # First check current directory
+    local_config = Path('config.json')
+    if local_config.exists():
+        return local_config
+    
+    # Otherwise use standard config directory
+    return get_config_dir() / 'config.json'
+
+
+def create_default_config(config_path: Path) -> None:
+    """
+    Create a default configuration file from the template.
+    
+    Args:
+        config_path: Path where to create the configuration file.
+    """
+    try:
+        # Create config directory if it doesn't exist
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Load template from package
+        if files is not None:
+            template_path = files('file_monitor').joinpath('config.template.json')
+            with template_path.open('r', encoding='utf-8') as f:
+                template_content = f.read()
+        else:
+            # Fallback: use hardcoded template
+            template_content = '''{
+  "_comment": "Configuration file for hump-yard file monitoring daemon",
+  "_comment2": "Add folders to monitor in the 'folders' array below",
+  "_comment3": "Each folder entry can have the following parameters:",
+  "_comment4": "  - path: Absolute path to the folder to monitor (required)",
+  "_comment5": "  - plugin: Name of the plugin to process files (required)",
+  "_comment6": "  - recursive: Monitor subfolders recursively (optional, default: false)",
+  "_comment7": "  - extensions: List of file extensions to process (optional, default: all files)",
+  "_comment8": "  - ...other plugin-specific parameters",
+  
+  "folders": [
+    {
+      "_comment": "Example configuration (remove this entry and add your own)",
+      "path": "/absolute/path/to/folder",
+      "plugin": "your_plugin_name",
+      "recursive": true,
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif", ".pdf"],
+      "_comment2": "Add any additional plugin-specific parameters here",
+      "_example_param": "example_value"
+    }
+  ]
+}'''
+        
+        # Write to config path
+        config_path.write_text(template_content, encoding='utf-8')
+        
+    except Exception as e:
+        raise RuntimeError(f"Failed to create default config: {e}")
 
 
 class FolderConfig:
@@ -63,14 +159,19 @@ class ConfigReader:
         logger: Logger instance.
     """
     
-    def __init__(self, config_path: str = "config.json") -> None:
+    def __init__(self, config_path: Optional[str] = None) -> None:
         """
         Initialize the configuration reader.
         
         Args:
-            config_path: Path to the configuration JSON file.
+            config_path: Path to the configuration JSON file. 
+                        If None, uses default path (current dir or standard config dir).
         """
-        self.config_path: Path = Path(config_path)
+        if config_path is None:
+            self.config_path = get_default_config_path()
+        else:
+            self.config_path = Path(config_path)
+        
         self.folders: list[FolderConfig] = []
         self.logger: logging.Logger = logging.getLogger("ConfigReader")
         self._load_config()
@@ -79,8 +180,14 @@ class ConfigReader:
         """Load configuration from JSON file."""
         try:
             if not self.config_path.exists():
-                self.logger.warning(f"Config file {self.config_path} not found, using empty config")
-                return
+                self.logger.info(f"Config file {self.config_path} not found, creating default config")
+                try:
+                    create_default_config(self.config_path)
+                    self.logger.info(f"Created default config at {self.config_path}")
+                except Exception as e:
+                    self.logger.error(f"Failed to create default config: {e}")
+                    self.logger.warning("Using empty configuration")
+                    return
             
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 config_data = json.load(f)
@@ -108,6 +215,16 @@ class ConfigReader:
         
         for folder_data in config_data['folders']:
             try:
+                # Skip example/comment entries (those that have _comment as first key or missing required fields)
+                if '_comment' in folder_data and len(folder_data) <= 3:
+                    self.logger.debug("Skipping example/comment entry in config")
+                    continue
+                
+                # Skip entries with placeholder paths
+                if folder_data.get('path', '').startswith('/absolute/path/'):
+                    self.logger.debug("Skipping example entry with placeholder path")
+                    continue
+                
                 folder_config = FolderConfig(folder_data)
                 self.folders.append(folder_config)
                 self.logger.debug(f"Added folder config: {folder_config}")

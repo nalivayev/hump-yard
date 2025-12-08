@@ -43,7 +43,7 @@ Repository = "https://github.com/nalivayev/hump-yard"
 Issues = "https://github.com/nalivayev/hump-yard/issues"
 
 [project.scripts]
-hump-yard = "hump_yard.cli:main"
+folder-monitor = "file_monitor.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -52,7 +52,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-hump_yard = ["*.json"]
+file_monitor = ["*.template.json"]
 
 [tool.black]
 line-length = 100

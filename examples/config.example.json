@@ -1,25 +1,50 @@
 {
-  "_comment": "This is an example configuration file for hump-yard",
-  "_comment2": "Copy this file as config.json and adjust to your needs",
-  "_comment3": "Note: Built-in plugins (rename, exif) are templates and not fully implemented yet",
+  "_comment": "Example configuration file for hump-yard file monitoring daemon",
+  "_comment2": "Copy this file to one of the following locations:",
+  "_comment3": "  - ./config.json (current directory)",
+  "_comment4": "  - %APPDATA%/hump-yard/config.json (Windows)",
+  "_comment5": "  - ~/.config/hump-yard/config.json (Linux/Unix)",
+  "_comment6": "Or specify custom path with: folder-monitor start -c /path/to/config.json",
   
   "folders": [
     {
+      "_comment": "Example 1: Monitor Pictures folder recursively for image files",
       "path": "C:/Users/YourName/Pictures",
+      "plugin": "your_custom_plugin",
       "recursive": true,
-      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif"],
-      "plugin": "your_custom_plugin"
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif", ".raw", ".cr2", ".nef"]
     },
     {
+      "_comment": "Example 2: Monitor Downloads folder (non-recursive) for documents",
       "path": "C:/Users/YourName/Downloads",
+      "plugin": "your_custom_plugin",
       "recursive": false,
-      "extensions": [".pdf", ".doc", ".docx"],
-      "plugin": "your_custom_plugin"
+      "extensions": [".pdf", ".doc", ".docx", ".txt"]
     },
     {
+      "_comment": "Example 3: Monitor uploads folder recursively for all file types",
       "path": "C:/Temp/uploads",
-      "recursive": true,
-      "plugin": "your_custom_plugin"
+      "plugin": "your_custom_plugin",
+      "recursive": true
     }
-  ]
+  ],
+  
+  "_usage_notes": {
+    "_note1": "Required parameters for each folder:",
+    "path": "Absolute path to the folder to monitor",
+    "plugin": "Name of the plugin to process files",
+    
+    "_note2": "Optional parameters for each folder:",
+    "recursive": "Monitor subfolders recursively (default: false)",
+    "extensions": "List of file extensions to process (default: all files)",
+    
+    "_note3": "Plugin-specific parameters:",
+    "_info": "Each plugin may accept additional parameters. Add them directly to the folder configuration.",
+    
+    "_note4": "Available built-in plugins (templates, not fully implemented):",
+    "_plugins": ["rename", "exif"],
+    
+    "_note5": "Creating custom plugins:",
+    "_info2": "See documentation on how to create and register custom plugins for your specific needs"
+  }
 }
