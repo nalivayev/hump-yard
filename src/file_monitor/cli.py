@@ -79,13 +79,31 @@ def is_process_running(pid: int) -> bool:
     """
     try:
         if sys.platform == 'win32':
+            # Optimization: Import ctypes only once or at module level if used frequently,
+            # but here we keep it local to avoid loading it on non-Windows systems unnecessarily,
+            # however, we can avoid re-importing inside the loop if this function is called often.
+            # For now, standard implementation is fine, but let's clean it up.
             import ctypes
             kernel32 = ctypes.windll.kernel32
-            PROCESS_QUERY_INFORMATION = 0x0400
-            handle = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, 0, pid)
+            # PROCESS_QUERY_INFORMATION = 0x0400
+            # PROCESS_VM_READ = 0x0010
+            
+            # Using OpenProcess with minimal rights to check existence
+            # 0x1000 is SYNCHRONIZE, which is enough to wait on it, but for checking existence
+            # we often use PROCESS_QUERY_LIMITED_INFORMATION (0x1000) on newer Windows
+            # or just 0 for some checks, but 0x0400 is standard for query info.
+            
+            handle = kernel32.OpenProcess(0x0400, 0, pid)
             if handle:
                 kernel32.CloseHandle(handle)
                 return True
+            
+            # If OpenProcess failed, it might be because of permissions (Access Denied),
+            # which means the process exists.
+            # GetLastError() == 5 (ERROR_ACCESS_DENIED)
+            if ctypes.GetLastError() == 5:
+                return True
+                
             return False
         else:
             # Unix: send signal 0 (doesn't kill, just checks)
@@ -125,13 +143,19 @@ def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = Fal
             # Windows: use pythonw or subprocess
             import subprocess
             python_exe = sys.executable
-            if not python_exe.endswith('pythonw.exe'):
-                pythonw = python_exe.replace('python.exe', 'pythonw.exe')
-                if Path(pythonw).exists():
+            if not python_exe.lower().endswith('pythonw.exe'):
+                # Try to find pythonw.exe in the same directory
+                python_dir = os.path.dirname(python_exe)
+                pythonw = os.path.join(python_dir, 'pythonw.exe')
+                if os.path.exists(pythonw):
                     python_exe = pythonw
             
             # Start detached process
-            args = [python_exe, '-m', 'file_monitor.cli', '_run', '-c', config_path, '--log-level', log_level]
+            args = [python_exe, '-m', 'file_monitor.cli', 'start', '--internal-worker']
+            if config_path:
+                args.extend(['-c', config_path])
+            args.extend(['--log-level', log_level])
+            
             subprocess.Popen(args, creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
             time.sleep(1)  # Wait for process to start
             
@@ -298,7 +322,7 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['start', 'stop', 'restart', 'status', '_run'],
+        choices=['start', 'stop', 'restart', 'status'],
         default='start',
         help='Command to execute (default: start)'
     )
@@ -330,10 +354,18 @@ Examples:
         help='Run in foreground (for start command)'
     )
     
+    parser.add_argument(
+        '--internal-worker',
+        action='store_true',
+        help=argparse.SUPPRESS
+    )
+    
     args = parser.parse_args()
     
     try:
-        if args.command == 'start':
+        if args.internal_worker:
+            _run_daemon(args.config, args.log_level)
+        elif args.command == 'start':
             cmd_start(args.config, args.log_level, args.foreground)
         elif args.command == 'stop':
             cmd_stop()
@@ -341,9 +373,6 @@ Examples:
             cmd_restart(args.config, args.log_level)
         elif args.command == 'status':
             cmd_status()
-        elif args.command == '_run':
-            # Internal command for Windows daemonization
-            _run_daemon(args.config, args.log_level)
     except KeyboardInterrupt:
         print("\nShutting down gracefully...")
         remove_pid_file()

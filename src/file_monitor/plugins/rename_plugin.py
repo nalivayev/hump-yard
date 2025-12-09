@@ -10,8 +10,7 @@ from datetime import datetime
 
 class RenamePlugin(FileProcessorPlugin):
     """
-    Plugin template for renaming files.
-    TODO: Full implementation coming soon.
+    Plugin for renaming files.
     """
     
     @property

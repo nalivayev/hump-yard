@@ -157,6 +157,10 @@ class PluginManager:
                     issubclass(attr, FileProcessorPlugin) and 
                     attr != FileProcessorPlugin):
                     
+                    # Only register plugins defined in this module, not imported ones
+                    if attr.__module__ != module_name:
+                        continue
+
                     self.register_plugin(attr)
                     
         except Exception as e:

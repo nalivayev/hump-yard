@@ -11,11 +11,21 @@ import json
 
 class ExifPlugin(FileProcessorPlugin):
     """
-    Plugin template for extracting EXIF data from images.
+    Plugin for extracting EXIF data from images.
     Requires PIL/Pillow library: pip install Pillow
-    TODO: Full implementation coming soon.
     """
     
+    def __init__(self) -> None:
+        super().__init__()
+        self._pil_available = False
+        try:
+            import PIL
+            from PIL import Image
+            from PIL.ExifTags import TAGS
+            self._pil_available = True
+        except ImportError:
+            self.logger.warning("PIL/Pillow not installed. ExifPlugin will not work. Run: pip install Pillow")
+
     @property
     def name(self) -> str:
         return "exif"
@@ -51,14 +61,13 @@ class ExifPlugin(FileProcessorPlugin):
         Returns:
             True if successful, False otherwise.
         """
+        if not self._pil_available:
+            return False
+
         try:
-            # Try to import PIL
-            try:
-                from PIL import Image
-                from PIL.ExifTags import TAGS
-            except ImportError:
-                self.logger.error("PIL/Pillow not installed. Run: pip install Pillow")
-                return False
+            # Lazy import to avoid overhead if not used, but we checked availability in __init__
+            from PIL import Image
+            from PIL.ExifTags import TAGS
             
             file_path_obj = Path(file_path)
             

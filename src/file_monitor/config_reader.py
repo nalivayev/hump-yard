@@ -7,15 +7,7 @@ import sys
 import os
 from pathlib import Path
 from typing import Any, Optional
-
-try:
-    from importlib.resources import files
-except ImportError:
-    # Fallback for Python < 3.9
-    try:
-        from importlib_resources import files  # type: ignore
-    except ImportError:
-        files = None  # type: ignore
+from importlib.resources import files
 
 
 def get_config_dir() -> Path:
@@ -67,34 +59,9 @@ def create_default_config(config_path: Path) -> None:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Load template from package
-        if files is not None:
-            template_path = files('file_monitor').joinpath('config.template.json')
-            with template_path.open('r', encoding='utf-8') as f:
-                template_content = f.read()
-        else:
-            # Fallback: use hardcoded template
-            template_content = '''{
-  "_comment": "Configuration file for hump-yard file monitoring daemon",
-  "_comment2": "Add folders to monitor in the 'folders' array below",
-  "_comment3": "Each folder entry can have the following parameters:",
-  "_comment4": "  - path: Absolute path to the folder to monitor (required)",
-  "_comment5": "  - plugin: Name of the plugin to process files (required)",
-  "_comment6": "  - recursive: Monitor subfolders recursively (optional, default: false)",
-  "_comment7": "  - extensions: List of file extensions to process (optional, default: all files)",
-  "_comment8": "  - ...other plugin-specific parameters",
-  
-  "folders": [
-    {
-      "_comment": "Example configuration (remove this entry and add your own)",
-      "path": "/absolute/path/to/folder",
-      "plugin": "your_plugin_name",
-      "recursive": true,
-      "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif", ".pdf"],
-      "_comment2": "Add any additional plugin-specific parameters here",
-      "_example_param": "example_value"
-    }
-  ]
-}'''
+        template_path = files('file_monitor').joinpath('config.template.json')
+        with template_path.open('r', encoding='utf-8') as f:
+            template_content = f.read()
         
         # Write to config path
         config_path.write_text(template_content, encoding='utf-8')
