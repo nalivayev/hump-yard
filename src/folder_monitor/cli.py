@@ -22,13 +22,13 @@ def get_pid_file() -> Path:
     """
     if sys.platform == 'win32':
         # Windows: use temp directory
-        return Path(os.environ.get('TEMP', '.')) / 'hump-yard.pid'
+        return Path(os.environ.get('TEMP', '.')) / 'folder-monitor.pid'
     else:
-        # Unix: try /var/run, fall back to ~/.hump-yard.pid
+        # Unix: try /var/run, fall back to ~/.folder-monitor.pid
         run_dir = Path('/var/run')
         if run_dir.exists() and os.access(run_dir, os.W_OK):
-            return run_dir / 'hump-yard.pid'
-        return Path.home() / '.hump-yard.pid'
+            return run_dir / 'folder-monitor.pid'
+        return Path.home() / '.folder-monitor.pid'
 
 
 def read_pid() -> Optional[int]:
@@ -151,7 +151,7 @@ def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = Fal
                     python_exe = pythonw
             
             # Start detached process
-            args = [python_exe, '-m', 'file_monitor.cli', 'start', '--internal-worker']
+            args = [python_exe, '-m', 'folder_monitor.cli', 'start', '--internal-worker']
             if config_path:
                 args.extend(['-c', config_path])
             args.extend(['--log-level', log_level])

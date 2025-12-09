@@ -173,7 +173,7 @@ class PluginManager:
             
             # Python 3.10+ has stable entry_points API with select method
             eps = importlib.metadata.entry_points()
-            discovered_plugins = eps.select(group='hump_yard.plugins')
+            discovered_plugins = eps.select(group='folder_monitor.plugins')
             
             for entry_point in discovered_plugins:
                 try:

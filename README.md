@@ -1,10 +1,10 @@
-# Hump Yard
+# Folder Monitor (Hump Yard)
 
 A file system monitoring daemon with plugin support for file processing.
 
 ## Description
 
-Hump Yard is a flexible file monitoring system that allows automatic processing of files when they are created in specified folders. The system is built on a plugin architecture, making it easy to extend functionality.
+Folder Monitor (formerly Hump Yard) is a flexible file monitoring system that allows automatic processing of files when they are created in specified folders. The system is built on a plugin architecture, making it easy to extend functionality.
 
 ## Features
 
@@ -38,21 +38,15 @@ pip install -e .
 
 Or install with additional dependencies:
 ```bash
-# For EXIF plugin support
-pip install -e ".[exif]"
-
 # For development (with code formatters and type checking)
 pip install -e ".[dev]"
-
-# Everything together
-pip install -e ".[exif,dev]"
 ```
 
 ## Configuration
 
 On first run, folder-monitor automatically creates a default configuration file with detailed examples and parameter descriptions:
-- **Windows**: `%APPDATA%\hump-yard\config.json` (e.g., `C:\Users\YourName\AppData\Roaming\hump-yard\config.json`)
-- **Linux/Unix**: `~/.config/hump-yard/config.json`
+- **Windows**: `%APPDATA%\folder-monitor\config.json` (e.g., `C:\Users\YourName\AppData\Roaming\folder-monitor\config.json`)
+- **Linux/Unix**: `~/.config/folder-monitor/config.json`
 
 You can also place `config.json` in the current directory - it will be used with higher priority.
 
@@ -63,15 +57,10 @@ The generated config file contains inline documentation and example entries. Edi
   "folders": [
     {
       "path": "C:/Users/YourName/Pictures",
-      "plugin": "your_plugin_name",
+      "plugin": "rename",
       "recursive": true,
-      "extensions": [".jpg", ".jpeg", ".png", ".tiff"]
-    },
-    {
-      "path": "C:/Users/YourName/Downloads",
-      "plugin": "your_plugin_name",
-      "recursive": false,
-      "extensions": [".pdf", ".doc"]
+      "extensions": [".jpg", ".jpeg", ".png", ".tiff"],
+      "prefix": "IMG_"
     }
   ]
 }

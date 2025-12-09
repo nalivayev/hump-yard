@@ -1,6 +1,6 @@
-# Examples for Hump Yard
+# Examples for Folder Monitor
 
-This folder contains example configuration files to demonstrate hump-yard capabilities.
+This folder contains example configuration files to demonstrate folder-monitor capabilities.
 
 ## Files
 
@@ -10,24 +10,19 @@ Example configuration file with various folder monitoring setup options.
 **Contains examples of:**
 - Monitoring with recursive file search
 - File extension filtering
-- Built-in plugin usage (rename, exif)
+- Built-in plugin usage (rename)
 - Passing parameters to plugins
 
 ## Built-in Plugin Templates
 
-Hump Yard comes with two plugin templates that serve as starting points:
+Folder Monitor comes with a plugin template that serves as a starting point:
 
 ### rename
-Plugin template for file renaming operations.
+Plugin for file renaming operations.
 
-**Status:** Template (full implementation coming soon)
+**Status:** Ready to use
 
-### exif
-Plugin template for EXIF data extraction from images.
-
-**Status:** Template (full implementation coming soon)
-
-**Note:** These are starter templates. You can use them as a reference for creating your own plugins.
+**Note:** This is a starter template. You can use it as a reference for creating your own plugins.
 
 ## How to Use Examples
 
@@ -42,7 +37,7 @@ cp examples/config.example.json config.json
 ### 2. Run
 
 ```bash
-hump-yard -c config.json
+folder-monitor -c config.json
 ```
 
 ## Creating Your Own Plugin
@@ -50,7 +45,7 @@ hump-yard -c config.json
 Use the examples as a template for creating your own plugins:
 
 ```python
-from hump_yard.base_plugin import FileProcessorPlugin
+from folder_monitor.base_plugin import FileProcessorPlugin
 from typing import Dict, Any
 
 class MyPlugin(FileProcessorPlugin):
@@ -75,4 +70,4 @@ class MyPlugin(FileProcessorPlugin):
 ## Additional Resources
 
 - [Documentation](../README.md)
-- [API Reference](../src/hump_yard/)
+- [API Reference](../src/folder_monitor/)

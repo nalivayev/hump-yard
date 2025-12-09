@@ -1,5 +1,5 @@
 {
-  "_comment": "Configuration file for hump-yard file monitoring daemon",
+  "_comment": "Configuration file for folder-monitor file monitoring daemon",
   "_comment2": "Add folders to monitor in the 'folders' array below",
   "_comment3": "Each folder entry can have the following parameters:",
   "_comment4": "  - path: Absolute path to the folder to monitor (required)",
@@ -12,11 +12,11 @@
     {
       "_comment": "Example configuration (remove this entry and add your own)",
       "path": "/absolute/path/to/folder",
-      "plugin": "your_plugin_name",
+      "plugin": "rename",
       "recursive": true,
       "extensions": [".jpg", ".jpeg", ".png", ".tiff", ".tif", ".pdf"],
       "_comment2": "Add any additional plugin-specific parameters here",
-      "_example_param": "example_value"
+      "prefix": "IMG_"
     }
   ]
 }

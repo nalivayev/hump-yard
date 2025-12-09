@@ -76,7 +76,7 @@ class FileMonitorDaemon:
     
     def load_plugins(self) -> None:
         """Load all available plugins."""
-        self.plugin_manager.discover_plugins('file_monitor.plugins')
+        self.plugin_manager.discover_plugins('folder_monitor.plugins')
         self.plugin_manager.discover_external_plugins()
         self.logger.info(f"Loaded plugins: {self.plugin_manager.list_plugins()}")
     

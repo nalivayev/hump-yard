@@ -18,11 +18,11 @@ def get_config_dir() -> Path:
         Path to the configuration directory.
     """
     if sys.platform == 'win32':
-        # Windows: %APPDATA%\hump-yard
-        config_dir = Path(os.environ.get('APPDATA', Path.home() / 'AppData' / 'Roaming')) / 'hump-yard'
+        # Windows: %APPDATA%\folder-monitor
+        config_dir = Path(os.environ.get('APPDATA', Path.home() / 'AppData' / 'Roaming')) / 'folder-monitor'
     else:
-        # Linux/Unix: ~/.config/hump-yard
-        config_dir = Path.home() / '.config' / 'hump-yard'
+        # Linux/Unix: ~/.config/folder-monitor
+        config_dir = Path.home() / '.config' / 'folder-monitor'
     
     return config_dir
 
@@ -59,7 +59,7 @@ def create_default_config(config_path: Path) -> None:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Load template from package
-        template_path = files('file_monitor').joinpath('config.template.json')
+        template_path = files('folder_monitor').joinpath('config.template.json')
         with template_path.open('r', encoding='utf-8') as f:
             template_content = f.read()
         
