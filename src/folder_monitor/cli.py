@@ -310,12 +310,12 @@ Commands:
   status      Check daemon status
 
 Examples:
-  folder-monitor start                      # Start with config.json
-  folder-monitor start -c /path/config.json # Start with custom config
+  folder-monitor start                       # Start with config.json
+  folder-monitor start -c /path/config.json  # Start with custom config
+  folder-monitor start --foreground          # Run in foreground (Ctrl+C to stop)
   folder-monitor stop                        # Stop daemon
   folder-monitor restart                     # Restart daemon
   folder-monitor status                      # Check status
-  folder-monitor start --foreground          # Run in foreground (Ctrl+C to stop)
         """
     )
     
