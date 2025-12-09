@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from .daemon import FileMonitorDaemon
+from folder_monitor.daemon import FileMonitorDaemon
 
 
 def get_pid_file() -> Path:

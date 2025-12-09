@@ -9,8 +9,8 @@ from typing import Optional
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
-from .base_plugin import PluginManager
-from .config_reader import ConfigReader
+from folder_monitor.base_plugin import PluginManager
+from folder_monitor.config_reader import ConfigReader
 
 
 class FileEventHandler(FileSystemEventHandler):

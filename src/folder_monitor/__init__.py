@@ -1,8 +1,8 @@
 """
-Hump Yard - File monitoring daemon with plugin support.
+Folder Monitor - File monitoring daemon with plugin support.
 """
-from .daemon import FileMonitorDaemon
-from .base_plugin import FileProcessorPlugin, PluginManager
+from folder_monitor.daemon import FileMonitorDaemon
+from folder_monitor.base_plugin import FileProcessorPlugin, PluginManager
 
 __all__ = ['FileMonitorDaemon', 'FileProcessorPlugin', 'PluginManager']
 

@@ -2,7 +2,7 @@
 Plugin template for file renaming.
 This is a starter template that will be fully implemented later.
 """
-from ..base_plugin import FileProcessorPlugin
+from folder_monitor.base_plugin import FileProcessorPlugin
 from pathlib import Path
 from typing import Dict, Any
 from datetime import datetime
