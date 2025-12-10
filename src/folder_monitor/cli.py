@@ -10,6 +10,9 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+if sys.platform == 'win32':
+    import ctypes
+
 from folder_monitor.daemon import FileMonitorDaemon
 
 
@@ -79,11 +82,7 @@ def is_process_running(pid: int) -> bool:
     """
     try:
         if sys.platform == 'win32':
-            # Optimization: Import ctypes only once or at module level if used frequently,
-            # but here we keep it local to avoid loading it on non-Windows systems unnecessarily,
-            # however, we can avoid re-importing inside the loop if this function is called often.
-            # For now, standard implementation is fine, but let's clean it up.
-            import ctypes
+            # Optimization: ctypes imported at module level
             kernel32 = ctypes.windll.kernel32
             # PROCESS_QUERY_INFORMATION = 0x0400
             # PROCESS_VM_READ = 0x0010

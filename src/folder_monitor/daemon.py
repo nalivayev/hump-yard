@@ -4,7 +4,6 @@ File monitoring daemon with plugin support.
 import time
 import logging
 from pathlib import Path
-from typing import Optional
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
