@@ -3,11 +3,30 @@ Base classes for file processing plugins.
 """
 import abc
 import logging
-from typing import Any
+import json
+from typing import Any, Dict, List
 import importlib
 import pkgutil
 import sys
+import os
 from pathlib import Path
+
+
+def get_config_dir() -> Path:
+    """
+    Get the standard configuration directory for hump-yard.
+    
+    Returns:
+        Path to the configuration directory.
+    """
+    if sys.platform == 'win32':
+        # Windows: %APPDATA%\folder-monitor
+        config_dir = Path(os.environ.get('APPDATA', Path.home() / 'AppData' / 'Roaming')) / 'folder-monitor'
+    else:
+        # Linux/Unix: ~/.config/folder-monitor
+        config_dir = Path.home() / '.config' / 'folder-monitor'
+    
+    return config_dir
 
 
 class FileProcessorPlugin(abc.ABC):
@@ -16,11 +35,13 @@ class FileProcessorPlugin(abc.ABC):
     
     Attributes:
         logger: Logger instance for the plugin.
+        config: Plugin configuration dictionary.
     """
     
     def __init__(self) -> None:
         """Initialize the plugin with a logger."""
         self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+        self.config: Dict[str, Any] = {}
     
     @property
     @abc.abstractmethod
@@ -43,6 +64,93 @@ class FileProcessorPlugin(abc.ABC):
             The plugin version string.
         """
         pass
+
+    @property
+    def default_config(self) -> Dict[str, Any]:
+        """
+        Default configuration template for the plugin.
+        Should be overridden by subclasses to provide a specific template.
+        
+        Returns:
+            Dictionary with default configuration.
+        """
+        return {"folders": []}
+
+    def get_config_path(self) -> Path:
+        """
+        Get the path to the plugin's configuration file.
+        
+        Returns:
+            Path object for the config file.
+        """
+        return get_config_dir() / 'plugins' / f"{self.name}.json"
+
+    def load_config(self) -> None:
+        """
+        Load configuration from file, creating it from default_config if missing.
+        """
+        config_path = self.get_config_path()
+        
+        if not config_path.exists():
+            self.logger.info(f"Config not found for {self.name}, creating default at {config_path}")
+            self.create_default_config(config_path)
+            
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                self.config = json.load(f)
+        except Exception as e:
+            self.logger.error(f"Failed to load config for {self.name}: {e}")
+            self.config = self.default_config
+
+    def create_default_config(self, path: Path) -> None:
+        """
+        Create the default configuration file.
+        
+        Tries to load 'config.template.json' from the plugin's package.
+        If not found, falls back to self.default_config property.
+        
+        Args:
+            path: Path where to create the file.
+        """
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Try to find config.template.json in the plugin's package
+            try:
+                # Get the module where the plugin class is defined
+                module_name = self.__module__
+                # If it's a submodule (e.g. package.plugin), get the package name
+                if '.' in module_name:
+                    package_name = module_name.rpartition('.')[0]
+                else:
+                    package_name = module_name
+                
+                from importlib.resources import files
+                template_path = files(package_name).joinpath('config.template.json')
+                
+                if template_path.is_file():
+                    self.logger.info(f"Found config template in {package_name}")
+                    path.write_text(template_path.read_text(encoding='utf-8'), encoding='utf-8')
+                    return
+            except Exception as e:
+                self.logger.debug(f"Could not load template from package: {e}")
+
+            # Fallback to default_config property
+            self.logger.info("Using default_config property")
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(self.default_config, f, indent=2, ensure_ascii=False)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to create default config for {self.name}: {e}")
+
+    def get_watch_folders(self) -> List[Dict[str, Any]]:
+        """
+        Get list of folders to watch from the configuration.
+        
+        Returns:
+            List of dictionaries defining folders to watch.
+        """
+        return self.config.get('folders', [])
     
     @abc.abstractmethod
     def can_handle(self, file_path: str) -> bool:

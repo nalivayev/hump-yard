@@ -51,7 +51,8 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-file_monitor = ["*.template.json"]
+folder_monitor = ["*.template.json"]
+"folder_monitor.plugins" = ["*.template.json"]
 
 [tool.black]
 line-length = 100

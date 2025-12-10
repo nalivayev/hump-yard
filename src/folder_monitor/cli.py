@@ -113,12 +113,11 @@ def is_process_running(pid: int) -> bool:
         return False
 
 
-def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = False) -> None:
+def cmd_start(log_level: str, foreground: bool = False) -> None:
     """
     Start the daemon.
     
     Args:
-        config_path: Path to configuration file.
         log_level: Logging level.
         foreground: Run in foreground (don't daemonize).
     """
@@ -132,11 +131,9 @@ def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = Fal
     if pid:
         remove_pid_file()
     
-    # Note: We don't check if config exists here, as ConfigReader will create it if needed
-    
     if foreground:
         # Run in foreground
-        _run_daemon(config_path, log_level)
+        _run_daemon(log_level)
     else:
         # Daemonize
         if sys.platform == 'win32':
@@ -152,8 +149,6 @@ def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = Fal
             
             # Start detached process
             args = [python_exe, '-m', 'folder_monitor.cli', 'start', '--internal-worker']
-            if config_path:
-                args.extend(['-c', config_path])
             args.extend(['--log-level', log_level])
             
             subprocess.Popen(args, creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
@@ -182,15 +177,14 @@ def cmd_start(config_path: Optional[str], log_level: str, foreground: bool = Fal
             
             # Child process
             os.setsid()
-            _run_daemon(config_path, log_level)
+            _run_daemon(log_level)
 
 
-def _run_daemon(config_path: Optional[str], log_level: str) -> None:
+def _run_daemon(log_level: str) -> None:
     """
     Internal function to run the daemon.
     
     Args:
-        config_path: Path to configuration file.
         log_level: Logging level.
     """
     # Write PID
@@ -212,7 +206,7 @@ def _run_daemon(config_path: Optional[str], log_level: str) -> None:
     
     try:
         # Create and start daemon
-        daemon = FileMonitorDaemon(config_path)
+        daemon = FileMonitorDaemon()
         daemon.start()
     except Exception as e:
         logging.error(f"Daemon error: {e}", exc_info=True)
@@ -265,12 +259,11 @@ def cmd_stop() -> None:
         sys.exit(1)
 
 
-def cmd_restart(config_path: Optional[str], log_level: str) -> None:
+def cmd_restart(log_level: str) -> None:
     """
     Restart the daemon.
     
     Args:
-        config_path: Path to configuration file.
         log_level: Logging level.
     """
     pid = read_pid()
@@ -278,7 +271,7 @@ def cmd_restart(config_path: Optional[str], log_level: str) -> None:
         cmd_stop()
         time.sleep(1)
     
-    cmd_start(config_path, log_level)
+    cmd_start(log_level)
 
 
 def cmd_status() -> None:
@@ -310,8 +303,7 @@ Commands:
   status      Check daemon status
 
 Examples:
-  folder-monitor start                       # Start with config.json
-  folder-monitor start -c /path/config.json  # Start with custom config
+  folder-monitor start                       # Start daemon
   folder-monitor start --foreground          # Run in foreground (Ctrl+C to stop)
   folder-monitor stop                        # Stop daemon
   folder-monitor restart                     # Restart daemon
@@ -325,13 +317,6 @@ Examples:
         choices=['start', 'stop', 'restart', 'status'],
         default='start',
         help='Command to execute (default: start)'
-    )
-    
-    parser.add_argument(
-        '-c', '--config',
-        type=str,
-        default=None,
-        help='Path to configuration file (default: auto-detect or create in standard location)'
     )
     
     parser.add_argument(
@@ -364,13 +349,13 @@ Examples:
     
     try:
         if args.internal_worker:
-            _run_daemon(args.config, args.log_level)
+            _run_daemon(args.log_level)
         elif args.command == 'start':
-            cmd_start(args.config, args.log_level, args.foreground)
+            cmd_start(args.log_level, args.foreground)
         elif args.command == 'stop':
             cmd_stop()
         elif args.command == 'restart':
-            cmd_restart(args.config, args.log_level)
+            cmd_restart(args.log_level)
         elif args.command == 'status':
             cmd_status()
     except KeyboardInterrupt:

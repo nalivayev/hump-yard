@@ -44,51 +44,51 @@ pip install -e ".[dev]"
 
 ## Configuration
 
-On first run, folder-monitor automatically creates a default configuration file with detailed examples and parameter descriptions:
-- **Windows**: `%APPDATA%\folder-monitor\config.json` (e.g., `C:\Users\YourName\AppData\Roaming\folder-monitor\config.json`)
-- **Linux/Unix**: `~/.config/folder-monitor/config.json`
+The system uses a plugin-centric configuration approach. Each plugin has its own configuration file located in the `plugins` subdirectory of the main configuration folder.
 
-You can also place `config.json` in the current directory - it will be used with higher priority.
+### Configuration Directory
 
-The generated config file contains inline documentation and example entries. Edit it to add your folders to monitor:
+- **Windows**: `%APPDATA%\folder-monitor\plugins\`
+- **Linux/Unix**: `~/.config/folder-monitor/plugins/`
+
+### Plugin Configuration
+
+When you install a new plugin and run `folder-monitor`, the plugin will automatically create a default configuration file (e.g., `rename.json` for the rename plugin) in the plugins directory if it doesn't exist.
+
+You can edit these JSON files to configure which folders to watch and how to process files.
+
+**Example `rename.json`:**
 
 ```json
 {
   "folders": [
     {
       "path": "C:/Users/YourName/Pictures",
-      "plugin": "rename",
       "recursive": true,
-      "extensions": [".jpg", ".jpeg", ".png", ".tiff"],
-      "prefix": "IMG_"
+      "prefix": "IMG_",
+      "timestamp_format": "%Y%m%d_%H%M%S"
     }
   ]
 }
 ```
 
-**Note:** Remove or modify the example entries in the generated config file. Placeholder paths (starting with `/absolute/path/`) are automatically skipped.
+### Creating Custom Plugins
 
-### Configuration Parameters:
+To create a custom plugin:
 
-#### Required Parameters:
-- **path** - Absolute path to the folder to monitor
-- **plugin** - Name of the plugin to process files
+1. Inherit from `FileProcessorPlugin`.
+2. Implement `name`, `version`, `can_handle`, and `process`.
+3. Create a `config.template.json` file in the same package as your plugin code. This file will be used as a template for the user's configuration.
 
-#### Optional Parameters:
-- **recursive** - Monitor subfolders recursively (default: `false`)
-- **extensions** - List of file extensions to process (default: all files)
-  - Example: `[".jpg", ".jpeg", ".png", ".tiff", ".tif"]`
-  - If omitted, all file types will be processed
+Example structure:
+```
+my_plugin/
+  __init__.py
+  plugin.py
+  config.template.json
+```
 
-#### Plugin-Specific Parameters:
-Each plugin may accept additional parameters. Add them directly to the folder configuration entry. Refer to your plugin's documentation for available options.
-
-### Configuration File Locations:
-
-The daemon searches for configuration in the following order:
-1. `./config.json` - Current directory (highest priority)
-2. Standard config directory (platform-specific, as shown above)
-3. Custom path specified with `-c` option
+The `config.template.json` should contain a valid JSON structure with example settings.
 
 ## Usage
 
@@ -97,9 +97,6 @@ The daemon searches for configuration in the following order:
 ```bash
 # Start daemon in background (auto-creates config if needed)
 folder-monitor start
-
-# Start with custom config file
-folder-monitor start -c /path/to/config.json
 
 # Start with logging level
 folder-monitor start --log-level DEBUG
@@ -123,14 +120,14 @@ folder-monitor --version
 folder-monitor --help
 ```
 
-**Note**: On first run without existing config, folder-monitor creates a default empty configuration file in the standard location. Edit it to add folders to monitor.
+**Note**: On first run, folder-monitor will create default configuration files for available plugins in the standard configuration directory (e.g., `~/.config/folder-monitor/plugins/`). Edit these files to configure folders to monitor.
 
 ### Using as a Library
 
 ```python
-from file_monitor import FileMonitorDaemon
+from folder_monitor.daemon import FileMonitorDaemon
 
-daemon = FileMonitorDaemon("config.json")
+daemon = FileMonitorDaemon()
 daemon.start()
 ```
 
@@ -175,7 +172,7 @@ class MyPlugin(FileProcessorPlugin):
 ## Command Line Options
 
 ```
-usage: folder-monitor [-h] [-c CONFIG] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--foreground]
+usage: folder-monitor [-h] [-v] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--foreground]
                       {start,stop,restart,status}
 
 Folder Monitor - File monitoring daemon with plugin support
@@ -190,35 +187,10 @@ Commands:
 
 Options:
   -h, --help            Show this help message and exit
-  -c CONFIG, --config CONFIG
-                        Path to configuration file (default: config.json)
   -v, --version         Show program's version number and exit
   --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set logging level (default: INFO)
   --foreground          Run in foreground (for start command)
-```
-
-## Project Structure
-
-```
-hump-yard/
-├── src/
-│   └── hump_yard/
-│       ├── __init__.py
-│       ├── base_plugin.py      # Base classes for plugins
-│       ├── cli.py              # CLI interface
-│       ├── config_reader.py    # Configuration reading
-│       ├── daemon.py            # Daemon class
-│       └── plugins/             # Plugin templates
-│           ├── __init__.py
-│           ├── rename_plugin.py  # Template for renaming plugin
-│           └── exif_plugin.py    # Template for EXIF plugin
-├── examples/                    # Configuration examples
-│   ├── config.example.json
-│   └── README.md
-├── pyproject.toml               # Project configuration and dependencies
-├── LICENSE                      # MIT License
-└── README.md                    # Documentation
 ```
 
 ## Requirements

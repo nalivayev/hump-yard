@@ -1,0 +1,11 @@
+{
+  "_comment": "Configuration for Rename Plugin",
+  "folders": [
+    {
+      "path": "C:/Temp/RenameInput",
+      "recursive": false,
+      "prefix": "renamed_",
+      "timestamp_format": "%Y%m%d_%H%M%S"
+    }
+  ]
+}

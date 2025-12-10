@@ -20,6 +20,20 @@ class RenamePlugin(FileProcessorPlugin):
     @property
     def version(self) -> str:
         return "1.0.0"
+
+    @property
+    def default_config(self) -> Dict[str, Any]:
+        """Default configuration for the rename plugin."""
+        return {
+            "folders": [
+                {
+                    "path": "C:/Temp/RenameInput",
+                    "recursive": False,
+                    "prefix": "renamed_",
+                    "timestamp_format": "%Y%m%d_%H%M%S"
+                }
+            ]
+        }
     
     def can_handle(self, file_path: str) -> bool:
         """
